@@ -8,7 +8,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Streamlit 앱 제목
 st.title("맞춤법 검사기")
-st.subheader("Google Gemini를 활용한 맞춤법 검사기")
+st.subheader("전지 전능한 Google Gemini를 활용한 맞춤법 검사기")
 
 # 텍스트 입력 받기
 user_input = st.text_area("텍스트 입력", "여기에 텍스트를 입력하세요.")
