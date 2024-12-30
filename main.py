@@ -1,50 +1,32 @@
+import os
 import streamlit as st
 import google.generativeai as genai
-import os
 
-# 페이지 설정
-st.set_page_config(
-    page_title="Gemini 맞춤법 검사기",
-    page_icon="✨",
-)
+# API 키 설정
+os.environ["GOOGLE_API_KEY"] = "AIzaSyDq6DsEk_f4sJWmlGPYC1Msxme1zNTwAh0"
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-st.title("Gemini 맞춤법 검사기 ✨")
-st.write("Gemini Pro 모델을 사용하여 맞춤법 및 문법 오류를 수정합니다.")
+# Streamlit 앱 제목
+st.title("맞춤법 검사기")
+st.subheader("Google Gemini를 활용한 맞춤법 검사기")
 
-# API 키 설정 (환경 변수에서 가져오기)
-GOOGLE_API_KEY = os.getenv("AIzaSyDq6DsEk_f4sJWmlGPYC1Msxme1zNTwAh0")
-if not GOOGLE_API_KEY:
-    st.error("API 키를 환경 변수 GOOGLE_API_KEY에 설정해주세요.")
-    st.stop()
+# 텍스트 입력 받기
+user_input = st.text_area("텍스트 입력", "여기에 텍스트를 입력하세요.")
 
-genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+# 맞춤법 검사 버튼
+if st.button("맞춤법 검사"):
+    if user_input.strip():  # 입력이 비어있지 않은 경우
+        try:
+            # 구글 제미나이 API 호출
+            prompt = f"다음 텍스트의 맞춤법과 문법 오류를 수정해주세요:\n\n{user_input}"
+            model = genai.GenerativeModel("gemini-pro")
+            response = model.generate_content(prompt)
+            
+            # 수정된 결과 출력
+            st.write("**수정된 텍스트:**")
+            st.success(response.text)
 
-def check_spelling(text):
-    """
-    Gemini Pro 모델을 사용하여 입력된 텍스트의 맞춤법 및 문법 오류를 수정합니다.
-
-    Args:
-        text: 맞춤법 검사를 할 텍스트
-
-    Returns:
-        수정된 텍스트
-    """
-    prompt_parts = [
-        "다음 문장의 맞춤법과 문법 오류를 수정해 주세요:",
-        text
-    ]
-    response = model.generate_content(prompt_parts)
-    return response.text
-
-# 사용자 입력 받기
-text_to_check = st.text_area("맞춤법 검사를 할 문장을 입력하세요:", height=200)
-
-if st.button("맞춤법 검사 실행"):
-    if text_to_check:
-        with st.spinner('열심히 교정 중...'):
-            corrected_text = check_spelling(text_to_check)
-        st.subheader("수정된 문장:")
-        st.write(corrected_text)
+        except Exception as e:
+            st.error(f"맞춤법 검사 중 오류가 발생했습니다: {e}")
     else:
-        st.warning("검사할 문장을 입력해주세요.")
+        st.warning("텍스트를 입력하세요.")
